@@ -17,6 +17,8 @@ namespace SimpleBlockchain
 
         public decimal Fee { get; private set; }
 
+        public long Timestamp { get; private set; }
+
 
         public Transaction(string sender, string receiver, decimal amount)
         {
@@ -25,6 +27,7 @@ namespace SimpleBlockchain
             Amount = ValidateNumber(amount);
             Fee = 0;
             Comment = "";
+            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             Id = GenerateId();
         }
 
@@ -33,8 +36,9 @@ namespace SimpleBlockchain
             Sender = sender;
             Receiver = receiver;
             Amount = ValidateNumber(amount);
-            Fee = fee;
+            Fee = ValidateNumber(fee);
             Comment = "";
+            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             Id = GenerateId();
         }
 
@@ -43,8 +47,9 @@ namespace SimpleBlockchain
             Sender = sender;
             Receiver = receiver;
             Amount = ValidateNumber(amount);
-            Fee = fee;
+            Fee = ValidateNumber(fee);
             Comment = comment;
+            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             Id = GenerateId();
         }
 
@@ -62,9 +67,10 @@ namespace SimpleBlockchain
         {
             using (SHA256 sha256 = SHA256.Create())
             {
-                string transactionData = $"{Sender}{Receiver}{Amount}{Fee}{Comment}";
+                string transactionData = $"{Sender}{Receiver}{Amount}{Fee}{Comment}{Timestamp}";
                 byte[] bytes = Encoding.UTF8.GetBytes(transactionData);
                 byte[] hash = sha256.ComputeHash(bytes);
+                hash = sha256.ComputeHash(hash);
 
                 StringBuilder sb = new StringBuilder();
                 foreach (byte b in hash)
@@ -78,7 +84,7 @@ namespace SimpleBlockchain
 
         public override string ToString()
         {
-            return $"{{Id: {Id}, sender: {Sender}, receiver: {Receiver}, amount: {Amount}, fee: {Fee}, comment: {Comment}}}";
+            return $"{{Id: {Id}, sender: {Sender}, receiver: {Receiver}, amount: {Amount}, fee: {Fee}, comment: {Comment}, timestamp: {Timestamp}}}";
         }
     }
 }

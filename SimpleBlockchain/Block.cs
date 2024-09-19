@@ -5,13 +5,13 @@ namespace SimpleBlockchain
 {
     public class Block
     {
-        public long Timestamp { get; set; }
+        public string Hash { get; set; }
 
         public string PreviousHash { get; set; }
 
-        public string Hash { get; set; }
-
         public List<Transaction> Transactions { get; set; }
+
+        public long Timestamp { get; set; }
 
         public int Nonce { get; set; } = 0;
 
@@ -20,7 +20,7 @@ namespace SimpleBlockchain
             PreviousHash = previousHash;
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             Transactions = transactions;
-            Hash = CalculateHash();
+            Hash = "";
         }
 
         public Block(string previousHash, long timestamp, List<Transaction> transactions)
@@ -28,7 +28,7 @@ namespace SimpleBlockchain
             PreviousHash = previousHash;
             Timestamp = timestamp;
             Transactions = transactions;
-            Hash = CalculateHash();
+            Hash = "";
         }
 
         public string CalculateHash()
@@ -48,6 +48,16 @@ namespace SimpleBlockchain
             }
         }
 
+        public void MineBlock(int difficulty)
+        {
+            string hashPrefix = new string('0', difficulty);
+            while (Hash == "" || Hash.Substring(0, difficulty) != hashPrefix)
+            {
+                Nonce++;
+                Hash = CalculateHash();
+            }
+        }
+
         private string TransactionsToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -58,22 +68,13 @@ namespace SimpleBlockchain
             return sb.ToString();
         }
 
-        public void MineBlock(int difficulty)
-        {
-            string hashPrefix = new string('0', difficulty);
-            while (Hash.Substring(0, difficulty) != hashPrefix)
-            {
-                Nonce++;
-                Hash = CalculateHash();
-            }
-        }
-
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append($"Timestamp: {Timestamp}\n");
-            sb.Append($"Previous hash: {PreviousHash}\n");
             sb.Append($"Hash: {Hash}\n");
+            sb.Append($"Previous hash: {PreviousHash}\n");
+            sb.Append($"Nonce: {Nonce}\n");
+            sb.Append($"Timestamp: {Timestamp}\n");
             sb.Append("Transactions:\n");
             foreach (var transaction in Transactions)
             {

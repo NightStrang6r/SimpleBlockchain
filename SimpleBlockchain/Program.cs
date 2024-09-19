@@ -8,43 +8,59 @@ namespace SimpleBlockchain
         {
             PrintHeader();
 
-            Blockchain akaBitcoin = new Blockchain(4);
-
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("================= Blocks adding test =================");
-            Console.ForegroundColor = ConsoleColor.White;
-            for (int i = 0; i < 3; i++)
+            List<Transaction> genesisTransactions = new List<Transaction> 
             {
-                Console.WriteLine("Mining block " + i + "...");
-                List<Transaction> transactions = new List<Transaction>
-                {
-                    new Transaction("Alice", "Bob", 50 * i, i),
-                    new Transaction("Bob", "Charlie", 25 + i)
-                };
-                Block block = new Block(akaBitcoin.GetLatestBlock().Hash, transactions);
-                akaBitcoin.AddBlock(block);
-                Console.WriteLine($"Block with hash {block.Hash} was successfully added to the blockchain.\n");
+                new Transaction("Network", "Alice", 50),
+                new Transaction("Network", "Bob", 10),
+                new Transaction("Network", "Charlie", 30)
+            };
+
+            Blockchain blockchain = new Blockchain(genesisTransactions, 4);
+
+            PrintColoredLine("================= Blocks adding test =================");
+            List<Transaction> firstTransactions = new List<Transaction>
+            {
+                new Transaction("Alice", "Bob", 50),
+                new Transaction("Charlie", "Bob", 20)
+            };
+            AddBlock(blockchain, firstTransactions);
+
+            List<Transaction> secondTransactions = new List<Transaction>
+            {
+                new Transaction("Charlie", "Alice", 10),
+                new Transaction("Alice", "Bob", 5)
+            };
+            AddBlock(blockchain, secondTransactions);
+
+            PrintColoredLine("================= Invalid transactions test =================");
+            List<Transaction> invalidTransactions = new List<Transaction>
+            {
+                new Transaction("Alice", "Bob", 100),
+                new Transaction("Bob", "Charlie", 100)
+            };
+            try
+            {
+                AddBlock(blockchain, invalidTransactions);
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine($"{e.Message}\n");
             }
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("================= Blockchain output test =================");
-            Console.ForegroundColor = ConsoleColor.White;
-            for (int i = 0; i < akaBitcoin.Chain.Count; i++)
+
+            PrintColoredLine("================= Blockchain output test =================");
+            for (int i = 0; i < blockchain.Chain.Count; i++)
             {
                 Console.WriteLine($"Block {i}: ");
-                Console.WriteLine(akaBitcoin.Chain[i].ToString());
+                Console.WriteLine(blockchain.Chain[i].ToString());
             }
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("================= Blockchain validity test =================");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"Is blockchain valid? {akaBitcoin.IsChainValid()}\n");
+            PrintColoredLine("================= Blockchain validity test =================");
+            Console.WriteLine($"Is blockchain valid? {blockchain.IsChainValid()}\n");
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("================= Blockchain tampering test =================");
-            Console.ForegroundColor = ConsoleColor.White;
-            akaBitcoin.Chain[1].Transactions[0] = new Transaction("Alice", "Leo", 1000000000);
-            Console.WriteLine($"Is blockchain valid after tampering? {akaBitcoin.IsChainValid()}\n");
+            PrintColoredLine("================= Blockchain tampering test =================");
+            blockchain.Chain[1].Transactions[0] = new Transaction("Alice", "Leo", 1000000000);
+            Console.WriteLine($"Is blockchain valid after tampering? {blockchain.IsChainValid()}\n");
         }
 
         public static void PrintHeader()
@@ -61,6 +77,21 @@ namespace SimpleBlockchain
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("ст. групи ПЗПІ-21-3, Царук Леонід\n");
             Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        public static void PrintColoredLine(string message, ConsoleColor color = ConsoleColor.Cyan)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        public static void AddBlock(Blockchain blockchain, List<Transaction> transactions)
+        {
+            Console.WriteLine("Mining block...");
+            Block block = new Block(blockchain.GetLatestBlock().Hash, transactions);
+            blockchain.AddBlock(block);
+            Console.WriteLine($"Block with hash {block.Hash} was successfully added to the blockchain.\n");
         }
     }
 }
