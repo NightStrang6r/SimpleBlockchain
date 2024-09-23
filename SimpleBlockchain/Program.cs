@@ -8,7 +8,7 @@ namespace SimpleBlockchain
         {
             PrintHeader();
 
-            List<Transaction> genesisTransactions = new List<Transaction> 
+            List<Transaction> genesisTransactions = new List<Transaction>
             {
                 new Transaction("Network", "Alice", 50),
                 new Transaction("Network", "Bob", 10),
@@ -31,6 +31,11 @@ namespace SimpleBlockchain
                 new Transaction("Alice", "Bob", 5)
             };
             AddBlock(blockchain, secondTransactions);
+
+            PrintColoredLine("================= Balance check test =================");
+            Console.WriteLine($"Alice balance: {blockchain.GetBalance("Alice")}");
+            Console.WriteLine($"Bob balance: {blockchain.GetBalance("Bob")}");
+            Console.WriteLine($"Charlie balance: {blockchain.GetBalance("Charlie")}\n");
 
             PrintColoredLine("================= Invalid transactions test =================");
             List<Transaction> invalidTransactions = new List<Transaction>

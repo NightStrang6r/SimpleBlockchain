@@ -53,7 +53,6 @@
 
         public void AddBlock(Block newBlock)
         {
-            if (!AreBalancesValid(newBlock)) throw new InvalidOperationException("Invalid balances");
             if (!IsBlockValid(newBlock, GetLatestBlock())) throw new InvalidOperationException("Invalid block");
 
             if (!IsSolutionValid(newBlock))
@@ -107,34 +106,6 @@
 
             return true;
         }
-
-        public bool AreBalancesValid(Block block)
-        {
-            Dictionary<string, decimal> balances = new Dictionary<string, decimal>();
-
-            foreach (var transaction in block.Transactions)
-            {
-                if (!balances.ContainsKey(transaction.Sender))
-                {
-                    balances[transaction.Sender] = GetBalance(transaction.Sender);
-                }
-
-                if (balances[transaction.Sender] < transaction.Amount)
-                {
-                    return false;
-                }
-
-                balances[transaction.Sender] -= transaction.Amount;
-                if (!balances.ContainsKey(transaction.Receiver))
-                {
-                    balances[transaction.Receiver] = 0;
-                }
-                balances[transaction.Receiver] += transaction.Amount;
-            }
-
-            return true;
-        }
-
 
         public decimal GetBalance(string user)
         {
